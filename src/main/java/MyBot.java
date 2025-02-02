@@ -12,6 +12,6 @@ public class MyBot implements BotInterface {
 
     @Override
     public void processTick(PublicGameWorld publicGameWorld) {
-
+        System.out.println("Hello, world!");
     }
 }
