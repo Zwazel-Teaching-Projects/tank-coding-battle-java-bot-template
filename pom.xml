@@ -22,10 +22,17 @@
     </repositories>
 
     <dependencies>
+        <!--for build on jitpack-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.Zwazel-BZZ-Projects</groupId>-->
+<!--            <artifactId>tank-coding-battle-java-interface</artifactId>-->
+<!--            <version>main-SNAPSHOT</version>-->
+<!--        </dependency>-->
+        <!--for local repository build-->
         <dependency>
-            <groupId>com.github.Zwazel-BZZ-Projects</groupId>
+            <groupId>dev.zwazel</groupId>
             <artifactId>tank-coding-battle-java-interface</artifactId>
-            <version>main-SNAPSHOT</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
