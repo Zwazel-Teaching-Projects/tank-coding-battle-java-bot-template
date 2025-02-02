@@ -14,4 +14,19 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.Zwazel-BZZ-Projects</groupId>
+            <artifactId>tank-coding-battle-java-interface</artifactId>
+            <version>main-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
 </project>
