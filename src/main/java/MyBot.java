@@ -3,8 +3,8 @@ import dev.zwazel.bot.BotInterface;
 import dev.zwazel.internal.PublicGameWorld;
 
 public class MyBot implements BotInterface {
-    public static void main(String[] args) {
-        GameWorld.startGame(new MyBot());
+    public void start() {
+        GameWorld.startGame(this);
     }
 
     @Override
