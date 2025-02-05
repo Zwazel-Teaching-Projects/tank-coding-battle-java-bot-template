@@ -1,6 +1,9 @@
 public class Main {
     public static void main(String[] args) {
-        MyBot bot = new MyBot();
-        bot.start();
+        Thread thread1 = new Thread(new MyBot());
+        Thread thread2 = new Thread(new MyBot());
+
+        thread1.start();
+        thread2.start();
     }
 }
