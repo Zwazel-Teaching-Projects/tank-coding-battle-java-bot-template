@@ -12,7 +12,7 @@ public class MyBot implements BotInterface {
 
     @Override
     public void processTick(PublicGameWorld publicGameWorld) {
-        System.out.println("Hello, world!");
+        System.out.println("Hello, world! " + publicGameWorld.getGameState().tick());
 
         publicGameWorld.send(new MessageContainer(MessageTarget.TEAM, new SimpleTextMessage("Hello from MyBot!")));
     }
