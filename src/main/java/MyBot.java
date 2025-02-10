@@ -1,20 +1,35 @@
 import dev.zwazel.GameWorld;
 import dev.zwazel.bot.BotInterface;
 import dev.zwazel.internal.PublicGameWorld;
+import dev.zwazel.internal.client.ConnectedClientConfig;
 import dev.zwazel.internal.message.MessageContainer;
+import dev.zwazel.internal.message.data.GameConfig;
 import dev.zwazel.internal.message.data.SimpleTextMessage;
 
-import static dev.zwazel.internal.message.MessageTarget.Type.SERVER_ONLY;
+import java.util.Arrays;
+
+import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 
 public class MyBot implements BotInterface {
+    GameConfig config;
+
     public void start() {
         GameWorld.startGame(this);
     }
 
     @Override
-    public void processTick(PublicGameWorld publicGameWorld) {
-        System.out.println("Hello, world! " + publicGameWorld.getGameState().tick());
+    public void setup(PublicGameWorld world, GameConfig config) {
+        this.config = config;
+    }
 
-        publicGameWorld.send(new MessageContainer(SERVER_ONLY.get(), new SimpleTextMessage("Hello from MyBot!")));
+    @Override
+    public void processTick(PublicGameWorld world) {
+        System.out.println("Hello, world! " + world.getGameState().tick());
+
+        // Sending out a message to one other client (not myself)
+        Arrays.stream(config.connectedClients())
+                .map(ConnectedClientConfig::clientId)
+                .filter(l -> l != config.clientId())
+                .findFirst().ifPresent(target -> world.send(new MessageContainer(CLIENT.get(target), new SimpleTextMessage("Hello from MyBot!"))));
     }
 }
