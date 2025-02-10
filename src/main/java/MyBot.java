@@ -26,10 +26,10 @@ public class MyBot implements BotInterface {
     public void processTick(PublicGameWorld world) {
         System.out.println("Hello, world! " + world.getGameState().tick());
 
-        // Sending out a message to one other client (not myself)
+        // Sending out a message to all other clients (not myself)
         Arrays.stream(config.connectedClients())
                 .map(ConnectedClientConfig::clientId)
                 .filter(l -> l != config.clientId())
-                .findFirst().ifPresent(target -> world.send(new MessageContainer(CLIENT.get(target), new SimpleTextMessage("Hello from MyBot!"))));
+                .forEach(target -> world.send(new MessageContainer(CLIENT.get(target), new SimpleTextMessage("Hello from MyBot!"))));
     }
 }
