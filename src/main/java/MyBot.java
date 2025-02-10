@@ -7,6 +7,7 @@ import dev.zwazel.internal.message.data.GameConfig;
 import dev.zwazel.internal.message.data.SimpleTextMessage;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 
@@ -25,6 +26,11 @@ public class MyBot implements BotInterface {
     @Override
     public void processTick(PublicGameWorld world) {
         System.out.println("Hello, world! " + world.getGameState().tick());
+
+        List<MessageContainer> messages = world.getMessages();
+        for (MessageContainer message : messages) {
+            System.out.println("Received message:\n\t" + message);
+        }
 
         // Sending out a message to all other clients (not myself)
         Arrays.stream(config.connectedClients())
