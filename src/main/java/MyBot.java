@@ -1,7 +1,8 @@
 import dev.zwazel.GameWorld;
+import dev.zwazel.PropertyHandler;
 import dev.zwazel.bot.BotInterface;
 import dev.zwazel.internal.PublicGameWorld;
-import dev.zwazel.internal.client.ConnectedClientConfig;
+import dev.zwazel.internal.connection.client.ConnectedClientConfig;
 import dev.zwazel.internal.message.MessageContainer;
 import dev.zwazel.internal.message.data.GameConfig;
 import dev.zwazel.internal.message.data.SimpleTextMessage;
@@ -13,9 +14,11 @@ import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 
 public class MyBot implements BotInterface {
     GameConfig config;
+    PropertyHandler propertyHandler;
 
     public void start() {
         GameWorld.startGame(this);
+        propertyHandler = PropertyHandler.getInstance();
     }
 
     @Override
@@ -36,6 +39,11 @@ public class MyBot implements BotInterface {
         Arrays.stream(config.connectedClients())
                 .map(ConnectedClientConfig::clientId)
                 .filter(l -> l != config.clientId())
-                .forEach(target -> world.send(new MessageContainer(CLIENT.get(target), new SimpleTextMessage("Hello from MyBot!"))));
+                .forEach(target -> world.send(new MessageContainer(
+                        CLIENT.get(target),
+                        new SimpleTextMessage("Hello from " +
+                                propertyHandler.getProperty("bot.name") + "!"
+                        )
+                )));
     }
 }
