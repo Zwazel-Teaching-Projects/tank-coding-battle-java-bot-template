@@ -1,8 +1,8 @@
 import dev.zwazel.GameWorld;
 import dev.zwazel.PropertyHandler;
-import dev.zwazel.bot.BotInterface;
 import dev.zwazel.internal.PublicGameWorld;
 import dev.zwazel.internal.connection.client.ConnectedClientConfig;
+import dev.zwazel.internal.game.tank.LightTank;
 import dev.zwazel.internal.message.MessageContainer;
 import dev.zwazel.internal.message.data.GameConfig;
 import dev.zwazel.internal.message.data.SimpleTextMessage;
@@ -12,7 +12,7 @@ import java.util.List;
 
 import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 
-public class MyBot implements BotInterface {
+public class MyBot implements LightTank {
     GameConfig config;
     PropertyHandler propertyHandler;
 
