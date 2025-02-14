@@ -13,12 +13,11 @@ import java.util.List;
 import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 
 public class MyBot implements LightTank {
-    GameConfig config;
-    PropertyHandler propertyHandler;
+    private final PropertyHandler propertyHandler = PropertyHandler.getInstance();
+    private GameConfig config;
 
     public void start() {
         GameWorld.startGame(this);
-        propertyHandler = PropertyHandler.getInstance();
     }
 
     @Override
