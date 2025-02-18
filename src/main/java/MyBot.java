@@ -47,7 +47,7 @@ public class MyBot implements BotInterface {
     @Override
     public void processTick(PublicGameWorld world, Tank tank) {
         LightTank lightTank = (LightTank) tank;
-        lightTank.move(Tank.MoveDirection.FORWARD);
+        lightTank.move(world, Tank.MoveDirection.FORWARD);
 
         ClientState myState = world.getMyState();
         System.out.println("myState = " + myState);
