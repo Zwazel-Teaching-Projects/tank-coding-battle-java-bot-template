@@ -1,8 +1,10 @@
 import dev.zwazel.GameWorld;
 import dev.zwazel.PropertyHandler;
+import dev.zwazel.bot.BotInterface;
 import dev.zwazel.internal.PublicGameWorld;
 import dev.zwazel.internal.connection.client.ConnectedClientConfig;
-import dev.zwazel.internal.game.tank.LightTank;
+import dev.zwazel.internal.game.tank.Tank;
+import dev.zwazel.internal.game.tank.implemented.LightTank;
 import dev.zwazel.internal.message.MessageContainer;
 import dev.zwazel.internal.message.data.GameConfig;
 import dev.zwazel.internal.message.data.SimpleTextMessage;
@@ -12,12 +14,12 @@ import java.util.List;
 
 import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 
-public class MyBot implements LightTank {
+public class MyBot implements BotInterface {
     private final PropertyHandler propertyHandler = PropertyHandler.getInstance();
     private GameConfig config;
 
     public void start() {
-        GameWorld.startGame(this);
+        GameWorld.startGame(this, LightTank.class);
     }
 
     @Override
@@ -26,7 +28,9 @@ public class MyBot implements LightTank {
     }
 
     @Override
-    public void processTick(PublicGameWorld world) {
+    public void processTick(PublicGameWorld world, Tank tank) {
+        LightTank lightTank = (LightTank) tank;
+
         System.out.println("Hello, world! " + world.getGameState().tick());
 
         List<MessageContainer> messages = world.getMessages();
