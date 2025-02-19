@@ -63,10 +63,8 @@ public class MyBot implements BotInterface {
         // Rotate towards the closest enemy, or move in a circle if no enemies are found
         closestEnemy.ifPresentOrElse(
                 enemy -> {
-                    lightTank.rotateBodyTowards(world, enemy.transform().getPosition());
-                    lightTank.move(world, Tank.MoveDirection.FORWARD);
-
                     System.out.println("Found enemy at " + enemy.transform().getPosition());
+                    tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transform().getPosition(), false);
                 }
                 ,
                 () -> {
@@ -87,7 +85,7 @@ public class MyBot implements BotInterface {
             System.out.println("Received message:\n\t" + message);
         }
 
-        // Sending a nice message to all team members
+        // Sending a nice message to all team members (individually, you could also send a single message to full team)
         teamMembers
                 .forEach(target -> world.send(new MessageContainer(
                         CLIENT.get(target.clientId()),
