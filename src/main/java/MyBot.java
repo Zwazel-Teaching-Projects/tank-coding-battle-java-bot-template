@@ -48,23 +48,30 @@ public class MyBot implements BotInterface {
     @Override
     public void processTick(PublicGameWorld world, Tank tank) {
         LightTank lightTank = (LightTank) tank;
+        ClientState myClientState = world.getMyState();
 
         // Get the closest enemy tank
         Optional<ClientState> closestEnemy = enemyTeamMembers.stream()
                 .map(connectedClientConfig -> world.getClientState(connectedClientConfig.clientId()))
                 // Filter out null states and states without a position
-                .filter(clientState -> clientState != null && clientState.transform().getPosition() != null)
+                .filter(clientState -> clientState != null && clientState.transformBody().getPosition() != null)
                 .min((o1, o2) -> {
-                    double distance1 = lightTank.getTransform(world).getPosition().distance(o1.transform().getPosition());
-                    double distance2 = lightTank.getTransform(world).getPosition().distance(o2.transform().getPosition());
+                    double distance1 = myClientState.transformBody().getPosition().distance(o1.transformBody().getPosition());
+                    double distance2 = myClientState.transformBody().getPosition().distance(o2.transformBody().getPosition());
                     return Double.compare(distance1, distance2);
                 });
 
         // Rotate towards the closest enemy, or move in a circle if no enemies are found
         closestEnemy.ifPresentOrElse(
                 enemy -> {
-                    System.out.println("Found enemy at " + enemy.transform().getPosition());
-                    tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transform().getPosition(), false);
+                    lightTank.rotateTurretTowards(world, enemy.transformBody().getPosition());
+                    // If enemy is close, shoot, otherwise move towards
+                    if (myClientState.transformBody().getPosition().distance(enemy.transformBody().getPosition()) < 2.5) {
+                        System.out.println("Found enemy at " + enemy.transformBody().getPosition() + ", shooting!");
+                    } else {
+                        System.out.println("Found enemy at " + enemy.transformBody().getPosition() + ", moving towards!");
+                        tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getPosition(), false);
+                    }
                 }
                 ,
                 () -> {
