@@ -12,6 +12,7 @@ import dev.zwazel.internal.message.data.GameConfig;
 import dev.zwazel.internal.message.data.SimpleTextMessage;
 
 import java.util.List;
+import java.util.Optional;
 
 import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 
@@ -47,8 +48,34 @@ public class MyBot implements BotInterface {
     @Override
     public void processTick(PublicGameWorld world, Tank tank) {
         LightTank lightTank = (LightTank) tank;
-        lightTank.rotateBody(world, Tank.RotationDirection.CLOCKWISE);
-        lightTank.move(world, Tank.MoveDirection.FORWARD);
+
+        // Get the closest enemy tank
+        Optional<ClientState> closestEnemy = enemyTeamMembers.stream()
+                .map(connectedClientConfig -> world.getClientState(connectedClientConfig.clientId()))
+                // Filter out null states and states without a position
+                .filter(clientState -> clientState != null && clientState.transform().getPosition() != null)
+                .min((o1, o2) -> {
+                    double distance1 = lightTank.getTransform(world).getPosition().distance(o1.transform().getPosition());
+                    double distance2 = lightTank.getTransform(world).getPosition().distance(o2.transform().getPosition());
+                    return Double.compare(distance1, distance2);
+                });
+
+        // Rotate towards the closest enemy, or move in a circle if no enemies are found
+        closestEnemy.ifPresentOrElse(
+                enemy -> {
+                    lightTank.rotateBodyTowards(world, enemy.transform().getPosition());
+                    lightTank.move(world, Tank.MoveDirection.FORWARD);
+
+                    System.out.println("Found enemy at " + enemy.transform().getPosition());
+                }
+                ,
+                () -> {
+                    System.out.println("No enemies found! Moving in a circle.");
+                    lightTank.rotateBody(world, Tank.RotationDirection.CLOCKWISE);
+                    lightTank.move(world, Tank.MoveDirection.FORWARD);
+                }
+        );
+
 
         ClientState myState = world.getMyState();
         System.out.println("myState = " + myState);
