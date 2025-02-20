@@ -54,38 +54,32 @@ public class MyBot implements BotInterface {
         Optional<ClientState> closestEnemy = enemyTeamMembers.stream()
                 .map(connectedClientConfig -> world.getClientState(connectedClientConfig.clientId()))
                 // Filter out null states and states without a position
-                .filter(clientState -> clientState != null && clientState.transformBody().getPosition() != null)
+                .filter(clientState -> clientState != null && clientState.transformBody().getTranslation() != null)
                 .min((o1, o2) -> {
-                    double distance1 = myClientState.transformBody().getPosition().distance(o1.transformBody().getPosition());
-                    double distance2 = myClientState.transformBody().getPosition().distance(o2.transformBody().getPosition());
+                    double distance1 = myClientState.transformBody().getTranslation().distance(o1.transformBody().getTranslation());
+                    double distance2 = myClientState.transformBody().getTranslation().distance(o2.transformBody().getTranslation());
                     return Double.compare(distance1, distance2);
                 });
 
         // Rotate towards the closest enemy, or move in a circle if no enemies are found
         closestEnemy.ifPresentOrElse(
                 enemy -> {
-                    lightTank.rotateTurretTowards(world, enemy.transformBody().getPosition());
+                    lightTank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
                     // If enemy is close, shoot, otherwise move towards
-                    if (myClientState.transformBody().getPosition().distance(enemy.transformBody().getPosition()) < 2.5) {
-                        System.out.println("Found enemy at " + enemy.transformBody().getPosition() + ", shooting!");
+                    if (myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation()) < 2.5) {
+                        // Shoot
                     } else {
-                        System.out.println("Found enemy at " + enemy.transformBody().getPosition() + ", moving towards!");
-                        tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getPosition(), false);
+                        // Move towards enemy
+                        tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), false);
                     }
                 }
                 ,
                 () -> {
-                    System.out.println("No enemies found! Moving in a circle.");
+                    // No enemies found, move in a circle
                     lightTank.rotateBody(world, Tank.RotationDirection.CLOCKWISE);
                     lightTank.move(world, Tank.MoveDirection.FORWARD);
                 }
         );
-
-
-        ClientState myState = world.getMyState();
-        System.out.println("myState = " + myState);
-
-        System.out.println("Hello, world! " + world.getGameState().tick());
 
         List<MessageContainer> messages = world.getIncomingMessages();
         for (MessageContainer message : messages) {
