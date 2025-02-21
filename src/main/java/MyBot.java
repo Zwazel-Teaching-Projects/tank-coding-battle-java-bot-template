@@ -6,6 +6,7 @@ import dev.zwazel.internal.connection.client.ConnectedClientConfig;
 import dev.zwazel.internal.game.lobby.TeamConfig;
 import dev.zwazel.internal.game.state.ClientState;
 import dev.zwazel.internal.game.tank.Tank;
+import dev.zwazel.internal.game.tank.TankConfig;
 import dev.zwazel.internal.game.tank.implemented.LightTank;
 import dev.zwazel.internal.message.MessageContainer;
 import dev.zwazel.internal.message.data.GameConfig;
@@ -19,6 +20,7 @@ import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 public class MyBot implements BotInterface {
     private final PropertyHandler propertyHandler = PropertyHandler.getInstance();
     private GameConfig config;
+    private TankConfig myTankConfig;
 
     private List<ConnectedClientConfig> teamMembers;
     private List<ConnectedClientConfig> enemyTeamMembers;
@@ -30,6 +32,7 @@ public class MyBot implements BotInterface {
     @Override
     public void setup(PublicGameWorld world, GameConfig config) {
         this.config = config;
+        myTankConfig = world.getTank().getConfig(world);
 
         TeamConfig myTeamConfig = config.getMyTeamConfig();
         TeamConfig enemyTeamConfig = config.teamConfigs().values().stream()
@@ -64,22 +67,29 @@ public class MyBot implements BotInterface {
         // Rotate towards the closest enemy, or move in a circle if no enemies are found
         closestEnemy.ifPresentOrElse(
                 enemy -> {
-                    lightTank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
+                    //lightTank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
                     // If enemy is close, shoot, otherwise move towards
-                    if (myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation()) < 2.5) {
+                    /*if (myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation()) < 2.5) {
                         // Shoot
                     } else {
                         // Move towards enemy
                         tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), false);
-                    }
+                    }*/
                 }
                 ,
                 () -> {
-                    // No enemies found, move in a circle
-                    lightTank.rotateBody(world, Tank.RotationDirection.CLOCKWISE);
+                    // No enemies found, move in a circle (negative is clockwise)
+                    lightTank.rotateBody(world, -myTankConfig.bodyRotationSpeed());
                     lightTank.move(world, Tank.MoveDirection.FORWARD);
                 }
         );
+
+        // No enemies found, move in a circle (negative is clockwise for yaw rotation)
+        lightTank.rotateBody(world, -myTankConfig.bodyRotationSpeed());
+        lightTank.rotateTurretYaw(world, myTankConfig.turretYawRotationSpeed());
+        // for pitch rotation, positive is down
+        lightTank.rotateTurretPitch(world, -myTankConfig.turretPitchRotationSpeed());
+        lightTank.move(world, Tank.MoveDirection.FORWARD);
 
         List<MessageContainer> messages = world.getIncomingMessages();
         for (MessageContainer message : messages) {
