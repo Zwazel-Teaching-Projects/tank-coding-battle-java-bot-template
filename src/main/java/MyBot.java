@@ -67,14 +67,14 @@ public class MyBot implements BotInterface {
         // Rotate towards the closest enemy, or move in a circle if no enemies are found
         closestEnemy.ifPresentOrElse(
                 enemy -> {
-                    //lightTank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
+                    lightTank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
                     // If enemy is close, shoot, otherwise move towards
-                    /*if (myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation()) < 2.5) {
+                    if (myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation()) < 2.5) {
                         // Shoot
                     } else {
                         // Move towards enemy
                         tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), false);
-                    }*/
+                    }
                 }
                 ,
                 () -> {
@@ -84,12 +84,12 @@ public class MyBot implements BotInterface {
                 }
         );
 
-        // No enemies found, move in a circle (negative is clockwise for yaw rotation)
+        /*// No enemies found, move in a circle (negative is clockwise for yaw rotation)
         lightTank.rotateBody(world, -myTankConfig.bodyRotationSpeed());
         lightTank.rotateTurretYaw(world, myTankConfig.turretYawRotationSpeed());
         // for pitch rotation, positive is down
-        lightTank.rotateTurretPitch(world, -myTankConfig.turretPitchRotationSpeed());
-        lightTank.move(world, Tank.MoveDirection.FORWARD);
+        // lightTank.rotateTurretPitch(world, -myTankConfig.turretPitchRotationSpeed());
+        lightTank.move(world, Tank.MoveDirection.FORWARD);*/
 
         List<MessageContainer> messages = world.getIncomingMessages();
         for (MessageContainer message : messages) {
