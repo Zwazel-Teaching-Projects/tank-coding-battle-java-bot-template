@@ -67,7 +67,13 @@ public class MyBot implements BotInterface {
                     lightTank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
                     // If enemy is close, shoot, otherwise move towards
                     if (myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation()) < 2.5) {
-                        lightTank.shoot(world);
+                        // You can check if you can shoot before shooting
+                        if (lightTank.canShoot(world)) {
+                            // Or also just shoot, it will return false if you can't shoot
+                            if (lightTank.shoot(world) && world.isDebug()) {
+                                System.out.println("Shot at enemy!");
+                            }
+                        }
                     } else {
                         // Move towards enemy
                         tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), false);
