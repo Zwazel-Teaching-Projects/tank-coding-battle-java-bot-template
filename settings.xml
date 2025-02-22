@@ -17,7 +17,7 @@
                 </repository>
                 <repository>
                     <id>github</id>
-                    <url>https://maven.pkg.github.com/Zwazel-BZZ-Projects/tank-coding-battle-java-interface</url>
+                    <url>https://maven.pkg.github.com/zwazel-teaching-projects/tank-coding-battle-java-interface</url>
                     <snapshots>
                         <enabled>true</enabled>
                     </snapshots>
@@ -29,6 +29,7 @@
     <servers>
         <server>
             <id>github</id>
+            <!--Either set the environment Variable or just replace with your username and GitHub Token-->
             <username>${env.GITHUB_USERNAME}</username>
             <password>${env.GITHUB_TOKEN}</password>
         </server>
