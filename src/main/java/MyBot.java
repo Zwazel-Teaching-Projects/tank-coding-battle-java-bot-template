@@ -40,9 +40,6 @@ public class MyBot implements BotInterface {
                 .findFirst()
                 .orElseThrow();
 
-        System.out.println("My team: " + myTeamConfig);
-        System.out.println("Enemy team: " + enemyTeamConfig);
-
         // Get all team members, excluding myself
         teamMembers = config.getTeamMembers(myTeamConfig.teamName(), config.clientId());
         enemyTeamMembers = config.getTeamMembers(enemyTeamConfig.teamName());
@@ -78,7 +75,7 @@ public class MyBot implements BotInterface {
                 }
                 ,
                 () -> {
-                    // No enemies found, move in a circle (negative is clockwise)
+                    // No enemies found, move in a circle (negative is clockwise for yaw rotation)
                     lightTank.rotateBody(world, -myTankConfig.bodyRotationSpeed());
                     lightTank.move(world, Tank.MoveDirection.FORWARD);
                 }
