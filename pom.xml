@@ -14,26 +14,42 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
-
     <dependencies>
-        <!--for build on jitpack-->
-<!--        <dependency>-->
-<!--            <groupId>com.github.Zwazel-BZZ-Projects</groupId>-->
-<!--            <artifactId>tank-coding-battle-java-interface</artifactId>-->
-<!--            <version>main-SNAPSHOT</version>-->
-<!--        </dependency>-->
-        <!--for local repository build-->
+        <!-- https://mvnrepository.com/artifact/io.github.cdimascio/java-dotenv -->
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>java-dotenv</artifactId>
+            <version>5.2.2</version>
+        </dependency>
+
         <dependency>
             <groupId>dev.zwazel</groupId>
             <artifactId>tank-coding-battle-java-interface</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.github.cdimascio</groupId>
+                <artifactId>java-dotenv</artifactId>
+                <version>5.2.2</version>
+                <executions>
+                    <execution>
+                        <id>load-env</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>load</goal>
+                        </goals>
+                        <configuration>
+                            <file>${project.basedir}/.env</file>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 
 </project>
