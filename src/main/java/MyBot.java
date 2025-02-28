@@ -7,7 +7,6 @@ import dev.zwazel.internal.game.lobby.TeamConfig;
 import dev.zwazel.internal.game.state.ClientState;
 import dev.zwazel.internal.game.tank.Tank;
 import dev.zwazel.internal.game.tank.TankConfig;
-import dev.zwazel.internal.game.tank.TankType;
 import dev.zwazel.internal.game.tank.implemented.LightTank;
 import dev.zwazel.internal.message.MessageContainer;
 import dev.zwazel.internal.message.MessageData;
@@ -69,7 +68,7 @@ public class MyBot implements BotInterface {
                     return Double.compare(distance1, distance2);
                 });
 
-        // Rotate towards the closest enemy, or move in a circle if no enemies are found
+        // Move towards the closest enemy and shoot when close enough, or move in a circle if no enemies are found
         closestEnemy.ifPresentOrElse(
                 enemy -> {
                     tank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
@@ -142,13 +141,12 @@ public class MyBot implements BotInterface {
 
     private void handleHittingTank(PublicGameWorld world, Hit hitMessageData) {
         ConnectedClientConfig targetConfig = world.getConnectedClientConfig(hitMessageData.hitEntity()).orElseThrow();
-        TankType targetTankType = targetConfig.clientTankType();
-        TankConfig targetTankConfig = world.getGameConfig().getTankConfig(targetTankType).orElseThrow();
+        TankConfig targetTankConfig = targetConfig.getTankConfig(world);
         TankConfig myTankConfig = world.getTank().getConfig(world);
         float armorOnHitSide = targetTankConfig.armor().get(hitMessageData.hitSide());
         float myExpectedDamage = myTankConfig.projectileDamage();
         float dealtDamage = hitMessageData.damageDealt();
-        ClientState targetState = world.getClientState(hitMessageData.hitEntity());
+        ClientState targetState = targetConfig.getClientState(world);
         System.out.println("Hit " + targetConfig.clientName() + " on " + hitMessageData.hitSide() + " side!");
         // print out how the damage was calculated
         System.out.println("Dealt damage: " + dealtDamage + " = " + myExpectedDamage + " * (1 - " + armorOnHitSide + ")");
