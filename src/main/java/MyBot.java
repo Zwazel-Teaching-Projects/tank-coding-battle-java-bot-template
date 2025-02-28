@@ -45,6 +45,7 @@ public class MyBot implements BotInterface {
 
         // Get all team members, excluding myself
         teamMembers = config.getTeamMembers(myTeamConfig.teamName(), config.clientId());
+        // Get all enemy team members
         enemyTeamMembers = config.getTeamMembers(enemyTeamConfig.teamName());
     }
 
