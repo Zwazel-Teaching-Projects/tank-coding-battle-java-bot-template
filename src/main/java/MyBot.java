@@ -30,11 +30,13 @@ public class MyBot implements BotInterface {
 
     public void start() {
         GameWorld.startGame(this, LightTank.class);
+        // GameWorld.startGame(this, HeavyTank.class);
+        // GameWorld.startGame(this, SelfPropelledArtillery.class);
     }
 
     @Override
-    public void setup(PublicGameWorld world, GameConfig config) {
-        this.config = config;
+    public void setup(PublicGameWorld world) {
+        this.config = world.getGameConfig();
         myTankConfig = world.getTank().getConfig(world);
 
         TeamConfig myTeamConfig = config.getMyTeamConfig();
@@ -49,8 +51,10 @@ public class MyBot implements BotInterface {
     }
 
     @Override
-    public void processTick(PublicGameWorld world, Tank tank) {
-        LightTank lightTank = (LightTank) tank;
+    public void processTick(PublicGameWorld world) {
+        LightTank tank = (LightTank) world.getTank();
+        // HeavyTank tank = (HeavyTank) world.getTank();
+        // SelfPropelledArtillery tank = (SelfPropelledArtillery) world.getTank();
         ClientState myClientState = world.getMyState();
 
         // Get the closest enemy tank
@@ -67,26 +71,27 @@ public class MyBot implements BotInterface {
         // Rotate towards the closest enemy, or move in a circle if no enemies are found
         closestEnemy.ifPresentOrElse(
                 enemy -> {
-                    lightTank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
+                    tank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
                     // If enemy is close, shoot, otherwise move towards
-                    if (myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation()) < 2.5) {
+                    if (myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation()) < 5.0) {
                         // You can check if you can shoot before shooting
-                        if (lightTank.canShoot(world)) {
-                            // Or also just shoot, it will return false if you can't shoot
-                            if (lightTank.shoot(world) && world.isDebug()) {
+                        if (tank.canShoot(world)) {
+                            // Or also just shoot, it will return false if you can't shoot.
+                            // And by checking the world, if debug is enabled, you can print out a message.
+                            if (tank.shoot(world) && world.isDebug()) {
                                 System.out.println("Shot at enemy!");
                             }
                         }
                     } else {
                         // Move towards enemy
-                        tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), false);
+                        tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), true);
                     }
                 }
                 ,
                 () -> {
                     // No enemies found, move in a circle (negative is clockwise for yaw rotation)
-                    lightTank.rotateBody(world, -myTankConfig.bodyRotationSpeed());
-                    lightTank.move(world, Tank.MoveDirection.FORWARD);
+                    tank.rotateBody(world, -myTankConfig.bodyRotationSpeed());
+                    tank.move(world, Tank.MoveDirection.FORWARD);
                 }
         );
 
@@ -109,7 +114,7 @@ public class MyBot implements BotInterface {
                     System.out.println("Got hit by " + shooterConfig.clientName() + " on " + gotHitMessageData.hitSide());
                     System.out.println("Received " + gotHitMessageData.damageReceived() + " damage!");
                     System.out.println("Current health: " + myClientState.currentHealth());
-                    
+
                     if (world.getMyState().state() == ClientState.PlayerState.DEAD) {
                         System.out.println("I'm dead!");
                     }
