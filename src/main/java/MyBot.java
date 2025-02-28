@@ -22,8 +22,6 @@ import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 
 public class MyBot implements BotInterface {
     private final PropertyHandler propertyHandler = PropertyHandler.getInstance();
-    private GameConfig config;
-    private TankConfig myTankConfig;
 
     private List<ConnectedClientConfig> teamMembers;
     private List<ConnectedClientConfig> enemyTeamMembers;
@@ -36,8 +34,7 @@ public class MyBot implements BotInterface {
 
     @Override
     public void setup(PublicGameWorld world) {
-        this.config = world.getGameConfig();
-        myTankConfig = world.getTank().getConfig(world);
+        GameConfig config = world.getGameConfig();
 
         TeamConfig myTeamConfig = config.getMyTeamConfig();
         TeamConfig enemyTeamConfig = config.teamConfigs().values().stream()
@@ -55,7 +52,9 @@ public class MyBot implements BotInterface {
         LightTank tank = (LightTank) world.getTank();
         // HeavyTank tank = (HeavyTank) world.getTank();
         // SelfPropelledArtillery tank = (SelfPropelledArtillery) world.getTank();
+        TankConfig myTankConfig = tank.getConfig(world);
         ClientState myClientState = world.getMyState();
+        GameConfig config = world.getGameConfig();
 
         // Get the closest enemy tank
         Optional<ClientState> closestEnemy = enemyTeamMembers.stream()
@@ -110,21 +109,10 @@ public class MyBot implements BotInterface {
                 case SimpleTextMessage textMessage ->
                         System.out.println("Received text message:\n\t" + textMessage.message());
                 case GotHit gotHitMessageData -> {
-                    ConnectedClientConfig shooterConfig = world.getConnectedClientConfig(gotHitMessageData.shooterEntity()).orElseThrow();
-                    System.out.println("Got hit by " + shooterConfig.clientName() + " on " + gotHitMessageData.hitSide());
-                    System.out.println("Received " + gotHitMessageData.damageReceived() + " damage!");
-                    System.out.println("Current health: " + myClientState.currentHealth());
-
-                    if (world.getMyState().state() == ClientState.PlayerState.DEAD) {
-                        System.out.println("I'm dead!");
-                    }
+                    handleGettingHit(world, gotHitMessageData);
                 }
                 case Hit hitMessageData -> {
-                    ConnectedClientConfig targetConfig = world.getConnectedClientConfig(hitMessageData.hitEntity()).orElseThrow();
-                    ClientState targetState = world.getClientState(hitMessageData.hitEntity());
-                    System.out.println("Hit " + targetConfig.clientName() + " on " + hitMessageData.hitSide());
-                    System.out.println("Dealt " + hitMessageData.damageDealt() + " damage!");
-                    System.out.println(targetConfig.clientName() + " health: " + targetState.currentHealth());
+                    handleHittingTank(world, hitMessageData);
                 }
                 default -> System.err.println("Received unknown message type: " + data.getClass().getSimpleName());
             }
@@ -148,5 +136,30 @@ public class MyBot implements BotInterface {
                                 "You're going down, " + target.clientName() + "!"
                         )
                 )));
+    }
+
+    private void handleHittingTank(PublicGameWorld world, Hit hitMessageData) {
+        ConnectedClientConfig targetConfig = world.getConnectedClientConfig(hitMessageData.hitEntity()).orElseThrow();
+        TankConfig targetTankConfig = world.getGameConfig().getTankConfig(targetConfig.clientTankType()).orElseThrow();
+        TankConfig myTankConfig = world.getTank().getConfig(world);
+        float armorOnHitSide = targetTankConfig.armor().get(hitMessageData.hitSide());
+        float myExpectedDamage = myTankConfig.projectileDamage();
+        float dealtDamage = hitMessageData.damageDealt();
+        ClientState targetState = world.getClientState(hitMessageData.hitEntity());
+        System.out.println("Hit " + targetConfig.clientName() + " on " + hitMessageData.hitSide() + " side!");
+        // print out how the damage was calculated
+        System.out.println("Dealt damage: " + dealtDamage + " = " + myExpectedDamage + " * (1 - " + armorOnHitSide + ")");
+        System.out.println(targetConfig.clientName() + " health: " + targetState.currentHealth());
+    }
+
+    private void handleGettingHit(PublicGameWorld world, GotHit gotHitMessageData) {
+        ConnectedClientConfig shooterConfig = world.getConnectedClientConfig(gotHitMessageData.shooterEntity()).orElseThrow();
+        System.out.println("Got hit by " + shooterConfig.clientName() + " on " + gotHitMessageData.hitSide());
+        System.out.println("Received " + gotHitMessageData.damageReceived() + " damage!");
+        System.out.println("Current health: " + world.getMyState().currentHealth());
+
+        if (world.getMyState().state() == ClientState.PlayerState.DEAD) {
+            System.out.println("I'm dead!");
+        }
     }
 }
