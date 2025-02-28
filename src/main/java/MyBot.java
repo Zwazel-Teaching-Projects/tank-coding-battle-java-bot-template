@@ -7,6 +7,7 @@ import dev.zwazel.internal.game.lobby.TeamConfig;
 import dev.zwazel.internal.game.state.ClientState;
 import dev.zwazel.internal.game.tank.Tank;
 import dev.zwazel.internal.game.tank.TankConfig;
+import dev.zwazel.internal.game.tank.TankType;
 import dev.zwazel.internal.game.tank.implemented.LightTank;
 import dev.zwazel.internal.message.MessageContainer;
 import dev.zwazel.internal.message.MessageData;
@@ -140,7 +141,8 @@ public class MyBot implements BotInterface {
 
     private void handleHittingTank(PublicGameWorld world, Hit hitMessageData) {
         ConnectedClientConfig targetConfig = world.getConnectedClientConfig(hitMessageData.hitEntity()).orElseThrow();
-        TankConfig targetTankConfig = world.getGameConfig().getTankConfig(targetConfig.clientTankType()).orElseThrow();
+        TankType targetTankType = targetConfig.clientTankType();
+        TankConfig targetTankConfig = world.getGameConfig().getTankConfig(targetTankType).orElseThrow();
         TankConfig myTankConfig = world.getTank().getConfig(world);
         float armorOnHitSide = targetTankConfig.armor().get(hitMessageData.hitSide());
         float myExpectedDamage = myTankConfig.projectileDamage();
