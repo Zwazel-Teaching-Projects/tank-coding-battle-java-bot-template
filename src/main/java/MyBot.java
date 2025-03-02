@@ -49,11 +49,17 @@ public class MyBot implements BotInterface {
 
     @Override
     public void processTick(PublicGameWorld world) {
+        ClientState myClientState = world.getMyState();
+
+        if (myClientState.state() == ClientState.PlayerState.DEAD) {
+            System.out.println("I'm dead!");
+            return;
+        }
+
         LightTank tank = (LightTank) world.getTank();
         // HeavyTank tank = (HeavyTank) world.getTank();
         // SelfPropelledArtillery tank = (SelfPropelledArtillery) world.getTank();
         TankConfig myTankConfig = tank.getConfig(world);
-        ClientState myClientState = world.getMyState();
         GameConfig config = world.getGameConfig();
 
         // Get the closest enemy tank
@@ -70,7 +76,6 @@ public class MyBot implements BotInterface {
         // Move towards the closest enemy and shoot when close enough, or move in a circle if no enemies are found
         closestEnemy.ifPresentOrElse(
                 enemy -> {
-                    tank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
                     // If enemy is close, shoot, otherwise move towards
                     if (myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation()) < 5.0) {
                         // You can check if you can shoot before shooting
@@ -85,6 +90,7 @@ public class MyBot implements BotInterface {
                         // Move towards enemy
                         tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), true);
                     }
+                    tank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
                 }
                 ,
                 () -> {
