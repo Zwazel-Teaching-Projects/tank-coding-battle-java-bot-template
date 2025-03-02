@@ -22,9 +22,16 @@ import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 
 public class MyBot implements BotInterface {
     private final PropertyHandler propertyHandler = PropertyHandler.getInstance();
+    private final float minAttackDistance;
+    private final float maxAttackDistance;
 
     private List<ConnectedClientConfig> teamMembers;
     private List<ConnectedClientConfig> enemyTeamMembers;
+
+    public MyBot() {
+        this.minAttackDistance = Float.parseFloat(propertyHandler.getProperty("bot.attack.minDistance"));
+        this.maxAttackDistance = Float.parseFloat(propertyHandler.getProperty("bot.attack.maxDistance"));
+    }
 
     public void start() {
         // GameWorld.startGame(this, LightTank.class); // This starts the game with a LightTank, and immediately starts the game when connected
@@ -76,8 +83,13 @@ public class MyBot implements BotInterface {
         // Move towards the closest enemy and shoot when close enough, or move in a circle if no enemies are found
         closestEnemy.ifPresentOrElse(
                 enemy -> {
-                    // If enemy is close, shoot, otherwise move towards
-                    if (myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation()) < 5.0) {
+                    // If enemy is within attack range, shoot; otherwise, move accordingly
+                    double distanceToEnemy = myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation());
+
+                    if (distanceToEnemy < this.minAttackDistance) {
+                        // Move away from enemy
+                        tank.moveTowards(world, Tank.MoveDirection.BACKWARD, enemy.transformBody().getTranslation(), true);
+                    } else if (distanceToEnemy <= this.maxAttackDistance) {
                         // You can check if you can shoot before shooting
                         if (tank.canShoot(world)) {
                             // Or also just shoot, it will return false if you can't shoot.
@@ -91,8 +103,7 @@ public class MyBot implements BotInterface {
                         tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), true);
                     }
                     tank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
-                }
-                ,
+                },
                 () -> {
                     // No enemies found, move in a circle (negative is clockwise for yaw rotation)
                     tank.rotateBody(world, -myTankConfig.bodyRotationSpeed());
@@ -100,13 +111,21 @@ public class MyBot implements BotInterface {
                 }
         );
 
-        /*// No enemies found, move in a circle (negative is clockwise for yaw rotation)
-        lightTank.rotateBody(world, -myTankConfig.bodyRotationSpeed());
-        lightTank.rotateTurretYaw(world, myTankConfig.turretYawRotationSpeed());
+        /*// Example of moving and rotating the tank
+        tank.rotateBody(world, -myTankConfig.bodyRotationSpeed());
+        tank.rotateTurretYaw(world, myTankConfig.turretYawRotationSpeed());
         // for pitch rotation, positive is down
-        // lightTank.rotateTurretPitch(world, -myTankConfig.turretPitchRotationSpeed());
-        lightTank.move(world, Tank.MoveDirection.FORWARD);*/
+        // tank.rotateTurretPitch(world, -myTankConfig.turretPitchRotationSpeed());
+        tank.move(world, Tank.MoveDirection.FORWARD);*/
 
+        // Get messages of a specific type only
+        List<MessageContainer> hitMessages = world.getIncomingMessages(Hit.class);
+        for (MessageContainer message : hitMessages) {
+            Hit gotHitMessageData = (Hit) message.getMessage();
+            handleHittingTank(world, gotHitMessageData);
+        }
+
+        // Get all messages
         List<MessageContainer> messages = world.getIncomingMessages();
         for (MessageContainer message : messages) {
             MessageData data = message.getMessage();
@@ -114,15 +133,12 @@ public class MyBot implements BotInterface {
             switch (data) {
                 case SimpleTextMessage textMessage ->
                         System.out.println("Received text message:\n\t" + textMessage.message());
-                case GotHit gotHitMessageData -> {
-                    handleGettingHit(world, gotHitMessageData);
-                }
-                case Hit hitMessageData -> {
-                    handleHittingTank(world, hitMessageData);
+                case GotHit gotHitMessageData -> handleGettingHit(world, gotHitMessageData);
+                case Hit _ -> {
+                    // We already handled this message type above
                 }
                 default -> System.err.println("Received unknown message type: " + data.getClass().getSimpleName());
             }
-
         }
 
         // Sending a nice message to all team members (individually, you could also send a single message to full team)
@@ -165,7 +181,7 @@ public class MyBot implements BotInterface {
         System.out.println("Current health: " + world.getMyState().currentHealth());
 
         if (world.getMyState().state() == ClientState.PlayerState.DEAD) {
-            System.out.println("I'm dead!");
+            System.out.println("I died! killed by " + shooterConfig.clientName());
         }
     }
 }
