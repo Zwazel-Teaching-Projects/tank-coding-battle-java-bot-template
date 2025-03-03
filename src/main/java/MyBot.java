@@ -73,7 +73,8 @@ public class MyBot implements BotInterface {
         Optional<ClientState> closestEnemy = enemyTeamMembers.stream()
                 .map(connectedClientConfig -> world.getClientState(connectedClientConfig.clientId()))
                 // Filter out null states and states without a position
-                .filter(clientState -> clientState != null && clientState.transformBody().getTranslation() != null)
+                .filter(clientState -> clientState != null && clientState.transformBody().getTranslation() != null &&
+                        clientState.state() != ClientState.PlayerState.DEAD)
                 .min((o1, o2) -> {
                     double distance1 = myClientState.transformBody().getTranslation().distance(o1.transformBody().getTranslation());
                     double distance2 = myClientState.transformBody().getTranslation().distance(o2.transformBody().getTranslation());
