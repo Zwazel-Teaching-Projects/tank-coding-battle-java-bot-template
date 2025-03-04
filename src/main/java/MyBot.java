@@ -72,7 +72,7 @@ public class MyBot implements BotInterface {
         // Get the closest enemy tank
         Optional<ClientState> closestEnemy = enemyTeamMembers.stream()
                 .map(connectedClientConfig -> world.getClientState(connectedClientConfig.clientId()))
-                // Filter out null states and states without a position
+                // Filter out null states, states without a position and dead states
                 .filter(clientState -> clientState != null && clientState.transformBody().getTranslation() != null &&
                         clientState.state() != ClientState.PlayerState.DEAD)
                 .min((o1, o2) -> {
@@ -88,9 +88,15 @@ public class MyBot implements BotInterface {
                     double distanceToEnemy = myClientState.transformBody().getTranslation().distance(enemy.transformBody().getTranslation());
 
                     if (distanceToEnemy < this.minAttackDistance) {
-                        // Move away from enemy
+                        // Move away from enemy if too close
                         tank.moveTowards(world, Tank.MoveDirection.BACKWARD, enemy.transformBody().getTranslation(), true);
-                    } else if (distanceToEnemy <= this.maxAttackDistance) {
+                    } else if (distanceToEnemy > this.maxAttackDistance) {
+                        // Move towards enemy if too far
+                        tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), true);
+                    }
+                    tank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
+
+                    if (distanceToEnemy <= this.maxAttackDistance) {
                         // You can check if you can shoot before shooting
                         if (tank.canShoot(world)) {
                             // Or also just shoot, it will return false if you can't shoot.
@@ -99,11 +105,7 @@ public class MyBot implements BotInterface {
                                 System.out.println("Shot at enemy!");
                             }
                         }
-                    } else {
-                        // Move towards enemy
-                        tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), true);
                     }
-                    tank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
                 },
                 () -> {
                     // No enemies found, move in a circle (negative is clockwise for yaw rotation)
