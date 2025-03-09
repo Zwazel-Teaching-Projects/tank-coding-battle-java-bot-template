@@ -70,7 +70,7 @@ public class MyBot implements BotInterface {
                     myClientState.transformBody().getTranslation()
             );
 
-            System.out.println("My closest position on the grid: " + myGridPosition);
+            // System.out.println("My closest position on the grid: " + myGridPosition);
         }
 
         LightTank tank = (LightTank) world.getTank();
