@@ -12,6 +12,7 @@ import dev.zwazel.internal.message.MessageContainer;
 import dev.zwazel.internal.message.MessageData;
 import dev.zwazel.internal.message.data.GameConfig;
 import dev.zwazel.internal.message.data.SimpleTextMessage;
+import dev.zwazel.internal.message.data.TeamScored;
 import dev.zwazel.internal.message.data.tank.GotHit;
 import dev.zwazel.internal.message.data.tank.Hit;
 
@@ -114,13 +115,6 @@ public class MyBot implements BotInterface {
                 }
         );
 
-        /*// Example of moving and rotating the tank
-        tank.rotateBody(world, -myTankConfig.bodyRotationSpeed());
-        tank.rotateTurretYaw(world, myTankConfig.turretYawRotationSpeed());
-        // for pitch rotation, positive is down
-        // tank.rotateTurretPitch(world, -myTankConfig.turretPitchRotationSpeed());
-        tank.move(world, Tank.MoveDirection.FORWARD);*/
-
         // Get messages of a specific type only
         List<MessageContainer> hitMessages = world.getIncomingMessages(Hit.class);
         for (MessageContainer message : hitMessages) {
@@ -140,7 +134,11 @@ public class MyBot implements BotInterface {
                 case Hit _ -> {
                     // We already handled this message type above
                 }
-                default -> System.err.println("Received unknown message type: " + data.getClass().getSimpleName());
+                case TeamScored teamScoredMessageData ->
+                        System.out.println("Team " + teamScoredMessageData.team() + " scored a point! Score: " + teamScoredMessageData.score());
+                // Not handled messages
+                default ->
+                        System.err.println("Received unhandled message \"" + data.getClass().getSimpleName() + "\":\n\t" + data);
             }
         }
 
