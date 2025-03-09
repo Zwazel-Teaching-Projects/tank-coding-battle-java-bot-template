@@ -8,6 +8,7 @@ import dev.zwazel.internal.game.state.ClientState;
 import dev.zwazel.internal.game.tank.Tank;
 import dev.zwazel.internal.game.tank.TankConfig;
 import dev.zwazel.internal.game.tank.implemented.LightTank;
+import dev.zwazel.internal.game.transform.Vec3;
 import dev.zwazel.internal.message.MessageContainer;
 import dev.zwazel.internal.message.MessageData;
 import dev.zwazel.internal.message.data.GameConfig;
@@ -64,9 +65,15 @@ public class MyBot implements BotInterface {
             return;
         }
 
+        if (world.isDebug()) {
+            Vec3 myGridPosition = world.getGameConfig().mapDefinition().getClosestTileFromWorld(
+                    myClientState.transformBody().getTranslation()
+            );
+
+            System.out.println("My closest position on the grid: " + myGridPosition);
+        }
+
         LightTank tank = (LightTank) world.getTank();
-        // HeavyTank tank = (HeavyTank) world.getTank();
-        // SelfPropelledArtillery tank = (SelfPropelledArtillery) world.getTank();
         TankConfig myTankConfig = tank.getConfig(world);
         GameConfig config = world.getGameConfig();
 
