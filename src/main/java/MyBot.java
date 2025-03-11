@@ -28,19 +28,19 @@ public class MyBot implements BotInterface {
         Quaternion myRot = myState.transformTurret().getRotation();
         double currentPitch = myRot.getPitch();
 
-        // Get the maximum pitch the turret can have (up is negative, down is positive)
         double maxPitch = myTankConfig.turretMaxPitch();
 
         // Print current pitch and maximum pitch
-        System.out.println("Current pitch: " + currentPitch + ", Maximum pitch: " + maxPitch);
+        System.out.println("Current pitch: " + currentPitch + ", Maximum pitch: " + maxPitch + ", Difference: " + (maxPitch - currentPitch));
 
-        // Rotate turret up until it reaches the maximum pitch, calculate the angle to rotate
-        double angleToRotate = Math.min(maxPitch - currentPitch, myTankConfig.turretPitchRotationSpeed());
-        tank.rotateTurretPitch(world, angleToRotate);
-        if (currentPitch < maxPitch) {
+        double epsilon = 1e-6; // Acceptable error margin
+        if (Math.abs(maxPitch - currentPitch) < epsilon) {
+            // Shoot if the turret is at the maximum pitch
+            tank.shoot(world);
+        } else {
+            // Rotate turret down until it reaches the minimum pitch, calculate the angle to rotate
+            double angleToRotate = Math.min(currentPitch - myTankConfig.turretMinPitch(), myTankConfig.turretPitchRotationSpeed());
+            tank.rotateTurretPitch(world, angleToRotate);
         }
-
-        // Shoot if the turret is at the maximum pitch
-        tank.shoot(world);
     }
 }
