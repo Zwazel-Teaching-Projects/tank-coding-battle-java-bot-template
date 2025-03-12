@@ -10,6 +10,7 @@ import dev.zwazel.internal.game.tank.Tank;
 import dev.zwazel.internal.game.tank.TankConfig;
 import dev.zwazel.internal.game.tank.implemented.LightTank;
 import dev.zwazel.internal.game.transform.Vec3;
+import dev.zwazel.internal.game.utils.Node;
 import dev.zwazel.internal.message.MessageContainer;
 import dev.zwazel.internal.message.MessageData;
 import dev.zwazel.internal.message.data.GameConfig;
@@ -18,6 +19,7 @@ import dev.zwazel.internal.message.data.TeamScored;
 import dev.zwazel.internal.message.data.tank.GotHit;
 import dev.zwazel.internal.message.data.tank.Hit;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +32,8 @@ public class MyBot implements BotInterface {
 
     private List<ConnectedClientConfig> teamMembers;
     private List<ConnectedClientConfig> enemyTeamMembers;
+
+    private MapVisualiser visualiser;
 
     public MyBot() {
         this.minAttackDistance = Float.parseFloat(propertyHandler.getProperty("bot.attack.minDistance"));
@@ -58,8 +62,8 @@ public class MyBot implements BotInterface {
 
         // If in debug, add visualiser
         if (world.isDebug()) {
-            // Add visualiser
-            MapVisualiser visualiser = new MapVisualiser(world);
+            // Add visualiser. By pressing space, you can switch between drawing modes.
+            visualiser = new MapVisualiser(world);
             visualiser.setDrawingMode(MapVisualiser.DrawingMode.valueOf(propertyHandler.getProperty("debug.visualiser.mode").toUpperCase()));
             visualiser.showMap();
             world.registerVisualiser(visualiser);
@@ -68,6 +72,13 @@ public class MyBot implements BotInterface {
 
     @Override
     public void processTick(PublicGameWorld world) {
+        LinkedList<Node> path = new LinkedList<>(); // TODO: Implement pathfinding (optimally you would only calculate this every now and then, not every tick)
+
+        if (visualiser != null) {
+            // sets the path to be visualised
+            visualiser.setPath(path);
+        }
+
         ClientState myClientState = world.getMyState();
 
         if (myClientState.state() == ClientState.PlayerState.DEAD) {
