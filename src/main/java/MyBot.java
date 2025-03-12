@@ -11,7 +11,8 @@ public class MyBot implements BotInterface {
     private final PropertyHandler propertyHandler = PropertyHandler.getInstance();
 
     public void start() {
-        GameWorld.connectToServer(this, SelfPropelledArtillery.class); // This connects to the server with a LightTank, but does not immediately start the game
+        // GameWorld.connectToServer(this, SelfPropelledArtillery.class); // This connects to the server with a LightTank, but does not immediately start the game
+        GameWorld.startGame(this, SelfPropelledArtillery.class); // This connects to the server with a LightTank, but does not immediately start the game
     }
 
     @Override
