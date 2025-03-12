@@ -3,6 +3,7 @@ import dev.zwazel.PropertyHandler;
 import dev.zwazel.bot.BotInterface;
 import dev.zwazel.internal.PublicGameWorld;
 import dev.zwazel.internal.connection.client.ConnectedClientConfig;
+import dev.zwazel.internal.debug.MapVisualiser;
 import dev.zwazel.internal.game.lobby.TeamConfig;
 import dev.zwazel.internal.game.state.ClientState;
 import dev.zwazel.internal.game.tank.Tank;
@@ -36,8 +37,8 @@ public class MyBot implements BotInterface {
     }
 
     public void start() {
-        // GameWorld.startGame(this, LightTank.class); // This starts the game with a LightTank, and immediately starts the game when connected
-        GameWorld.connectToServer(this, LightTank.class); // This connects to the server with a LightTank, but does not immediately start the game
+        GameWorld.startGame(this, LightTank.class); // This starts the game with a LightTank, and immediately starts the game when connected
+        // GameWorld.connectToServer(this, LightTank.class); // This connects to the server with a LightTank, but does not immediately start the game
     }
 
     @Override
@@ -54,6 +55,15 @@ public class MyBot implements BotInterface {
         teamMembers = config.getTeamMembers(myTeamConfig.teamName(), config.clientId());
         // Get all enemy team members
         enemyTeamMembers = config.getTeamMembers(enemyTeamConfig.teamName());
+
+        // If in debug, add visualiser
+        if (world.isDebug()) {
+            // Add visualiser
+            MapVisualiser visualiser = new MapVisualiser(world);
+            visualiser.setDrawingMode(MapVisualiser.DrawingMode.valueOf(propertyHandler.getProperty("debug.visualiser.mode").toUpperCase()));
+            visualiser.showMap();
+            world.registerVisualiser(visualiser);
+        }
     }
 
     @Override
