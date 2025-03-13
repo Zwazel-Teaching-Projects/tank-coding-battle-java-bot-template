@@ -41,8 +41,8 @@ public class MyBot implements BotInterface {
     }
 
     public void start() {
-        GameWorld.startGame(this, LightTank.class); // This starts the game with a LightTank, and immediately starts the game when connected
-        // GameWorld.connectToServer(this, LightTank.class); // This connects to the server with a LightTank, but does not immediately start the game
+        // GameWorld.startGame(this, LightTank.class); // This starts the game with a LightTank, and immediately starts the game when connected
+        GameWorld.connectToServer(this, LightTank.class); // This connects to the server with a LightTank, but does not immediately start the game
     }
 
     @Override
