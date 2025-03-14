@@ -65,8 +65,10 @@ public class MyBot implements BotInterface {
             // Add visualiser. By pressing space, you can switch between drawing modes.
             visualiser = new MapVisualiser(world);
             visualiser.setDrawingMode(MapVisualiser.DrawingMode.valueOf(propertyHandler.getProperty("debug.visualiser.mode").toUpperCase()));
-            visualiser.showMap();
             world.registerVisualiser(visualiser);
+            visualiser.setMaxWindowHeight(1000);
+            visualiser.setMaxWindowWidth(1200);
+            visualiser.showMap();
         }
     }
 
