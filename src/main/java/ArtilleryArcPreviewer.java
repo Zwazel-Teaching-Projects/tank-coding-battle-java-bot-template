@@ -15,7 +15,6 @@ import java.util.List;
 ///     0.0 is horizontal (shooting straight, parallel to the ground)
 ///     + is shooting downwards
 ///     - is shooting upwards
-/// also have a max and min pitch, where the max pitch is for example -1.4 radians and the min pitch is 0.8 radians
 ///
 /// the server calculates the artillery shell's path using the following formula:
 /// ```rust
@@ -23,10 +22,6 @@ import java.util.List;
 /// velocity.y -= gravity * dt;
 /// transform.translation += velocity * dt;
 ///```
-///
-/// The artillery arc previewer will calculate the artillery arc and display it on the screen.
-/// it must have input fields for the parameters, and a button to calculate the arc.
-/// it must display the arc on the screen as a line.
 public class ArtilleryArcPreviewer extends JPanel {
     private final JTextField tickRateField;
     private final JTextField speedField;
