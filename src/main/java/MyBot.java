@@ -2,6 +2,8 @@ import dev.zwazel.GameWorld;
 import dev.zwazel.PropertyHandler;
 import dev.zwazel.bot.BotInterface;
 import dev.zwazel.internal.PublicGameWorld;
+import dev.zwazel.internal.config.LobbyConfig;
+import dev.zwazel.internal.config.LocalBotConfig;
 import dev.zwazel.internal.connection.client.ConnectedClientConfig;
 import dev.zwazel.internal.debug.MapVisualiser;
 import dev.zwazel.internal.game.lobby.TeamConfig;
@@ -10,6 +12,7 @@ import dev.zwazel.internal.game.tank.Tank;
 import dev.zwazel.internal.game.tank.TankConfig;
 import dev.zwazel.internal.game.tank.implemented.LightTank;
 import dev.zwazel.internal.game.transform.Vec3;
+import dev.zwazel.internal.game.utils.Graph;
 import dev.zwazel.internal.game.utils.Node;
 import dev.zwazel.internal.message.MessageContainer;
 import dev.zwazel.internal.message.MessageData;
@@ -29,10 +32,8 @@ public class MyBot implements BotInterface {
     private final PropertyHandler propertyHandler = PropertyHandler.getInstance();
     private final float minAttackDistance;
     private final float maxAttackDistance;
-
     private List<ConnectedClientConfig> teamMembers;
     private List<ConnectedClientConfig> enemyTeamMembers;
-
     private MapVisualiser visualiser;
 
     public MyBot() {
@@ -40,9 +41,33 @@ public class MyBot implements BotInterface {
         this.maxAttackDistance = Float.parseFloat(propertyHandler.getProperty("bot.attack.maxDistance"));
     }
 
-    public void start() {
-        // GameWorld.startGame(this, LightTank.class); // This starts the game with a LightTank, and immediately starts the game when connected
-        GameWorld.connectToServer(this, LightTank.class); // This connects to the server with a LightTank, but does not immediately start the game
+    public static void main(String[] args) {
+        MyBot bot = new MyBot();
+        
+        GameWorld.startGame(bot); // This starts the game with a LightTank, and immediately starts the game when connected
+        // GameWorld.connectToServer(bot); // This connects to the server with a LightTank, but does not immediately start the game
+    }
+
+    @Override
+    public LocalBotConfig getLocalBotConfig() {
+        return LocalBotConfig.builder()
+                .debugMode(Optional.ofNullable(propertyHandler.getProperty("debug.mode"))
+                        .map(GameWorld.DebugMode::valueOf))
+                .botName(propertyHandler.getProperty("bot.name"))
+                .tankType(LightTank.class)
+                .serverIp(propertyHandler.getProperty("server.ip"))
+                .serverPort(Integer.parseInt(propertyHandler.getProperty("server.port")))
+                .lobbyConfig(LobbyConfig.builder()
+                        .lobbyName(propertyHandler.getProperty("lobby.name"))
+                        .teamName(propertyHandler.getProperty("lobby.name"))
+                        .teamName(propertyHandler.getProperty("lobby.team.name"))
+                        .mapName(propertyHandler.getProperty("lobby.map.name"))
+                        .spawnPoint(Optional.ofNullable(propertyHandler.getProperty("lobby.spawnPoint"))
+                                .map(Integer::parseInt))
+                        .fillEmptySlots(Boolean.parseBoolean(propertyHandler.getProperty("lobby.fillEmptySlots")))
+                        .build()
+                )
+                .build();
     }
 
     @Override
@@ -74,15 +99,18 @@ public class MyBot implements BotInterface {
 
     @Override
     public void processTick(PublicGameWorld world) {
+        Graph graph = new Graph(world.getGameConfig().mapDefinition(), false);
         LinkedList<Node> path = new LinkedList<>(); // TODO: Implement pathfinding (optimally you would only calculate this every now and then, not every tick)
 
         if (visualiser != null) {
             // sets the path to be visualised
             visualiser.setPath(path);
+            visualiser.setGraph(graph);
         }
 
         ClientState myClientState = world.getMyState();
 
+        // If dead, do nothing. Early return.
         if (myClientState.state() == ClientState.PlayerState.DEAD) {
             System.out.println("I'm dead!");
             return;
