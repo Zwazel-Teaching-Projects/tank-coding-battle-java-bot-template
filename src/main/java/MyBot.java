@@ -4,45 +4,27 @@ import dev.zwazel.bot.BotInterface;
 import dev.zwazel.internal.PublicGameWorld;
 import dev.zwazel.internal.config.LobbyConfig;
 import dev.zwazel.internal.config.LocalBotConfig;
-import dev.zwazel.internal.connection.client.ConnectedClientConfig;
 import dev.zwazel.internal.debug.MapVisualiser;
 import dev.zwazel.internal.game.lobby.TeamConfig;
 import dev.zwazel.internal.game.state.ClientState;
 import dev.zwazel.internal.game.tank.TankConfig;
-import dev.zwazel.internal.game.tank.implemented.LightTank;
+import dev.zwazel.internal.game.tank.implemented.SelfPropelledArtillery;
+import dev.zwazel.internal.game.transform.Quaternion;
 import dev.zwazel.internal.game.transform.Vec3;
 import dev.zwazel.internal.game.utils.Graph;
 import dev.zwazel.internal.game.utils.Node;
-import dev.zwazel.internal.message.MessageContainer;
-import dev.zwazel.internal.message.MessageData;
 import dev.zwazel.internal.message.data.GameConfig;
-import dev.zwazel.internal.message.data.SimpleTextMessage;
-import dev.zwazel.internal.message.data.TeamScored;
-import dev.zwazel.internal.message.data.tank.GotHit;
-import dev.zwazel.internal.message.data.tank.Hit;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
-
-import static dev.zwazel.internal.message.MessageTarget.Type.CLIENT;
 
 public class MyBot implements BotInterface {
     private final PropertyHandler propertyHandler = PropertyHandler.getInstance();
-    private final float minAttackDistance;
-    private final float maxAttackDistance;
-    private List<ConnectedClientConfig> teamMembers;
-    private List<ConnectedClientConfig> enemyTeamMembers;
     private MapVisualiser visualiser;
-
-    public MyBot() {
-        this.minAttackDistance = Float.parseFloat(propertyHandler.getProperty("bot.attack.minDistance"));
-        this.maxAttackDistance = Float.parseFloat(propertyHandler.getProperty("bot.attack.maxDistance"));
-    }
 
     public static void main(String[] args) {
         MyBot bot = new MyBot();
-        
+
         GameWorld.startGame(bot); // This starts the game with a LightTank, and immediately starts the game when connected
         // GameWorld.connectToServer(bot); // This connects to the server with a LightTank, but does not immediately start the game
     }
@@ -53,7 +35,7 @@ public class MyBot implements BotInterface {
                 .debugMode(Optional.ofNullable(propertyHandler.getProperty("debug.mode"))
                         .map(GameWorld.DebugMode::valueOf))
                 .botName(propertyHandler.getProperty("bot.name"))
-                .tankType(LightTank.class)
+                .tankType(SelfPropelledArtillery.class)
                 .serverIp(propertyHandler.getProperty("server.ip"))
                 .serverPort(Integer.parseInt(propertyHandler.getProperty("server.port")))
                 .lobbyConfig(LobbyConfig.builder()
@@ -80,9 +62,7 @@ public class MyBot implements BotInterface {
                 .orElseThrow();
 
         // Get all team members, excluding myself
-        teamMembers = config.getTeamMembers(myTeamConfig.teamName(), config.clientId());
         // Get all enemy team members
-        enemyTeamMembers = config.getTeamMembers(enemyTeamConfig.teamName());
 
         // If in debug, add visualiser
         if (world.isDebug()) {
@@ -123,10 +103,11 @@ public class MyBot implements BotInterface {
             // System.out.println("My closest position on the grid: " + myGridPosition);
         }
 
-        LightTank tank = (LightTank) world.getTank();
+        SelfPropelledArtillery tank = (SelfPropelledArtillery) world.getTank();
         TankConfig myTankConfig = tank.getConfig(world);
 
         // Get current pitch (up/down rotation) of the turret
+        ClientState myState = world.getMyState();
         Quaternion myRot = myState.transformTurret().getRotation();
         double currentPitch = myRot.getPitch();
 
