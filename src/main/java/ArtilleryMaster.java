@@ -18,15 +18,15 @@ import dev.zwazel.internal.message.data.GameConfig;
 import java.util.LinkedList;
 import java.util.Optional;
 
-public class MyBot implements BotInterface {
+public class ArtilleryMaster implements BotInterface {
     private final PropertyHandler propertyHandler = PropertyHandler.getInstance();
     private MapVisualiser visualiser;
 
     public static void main(String[] args) {
-        MyBot bot = new MyBot();
+        ArtilleryMaster bot = new ArtilleryMaster();
 
-        GameWorld.startGame(bot); // This starts the game with a LightTank, and immediately starts the game when connected
-        // GameWorld.connectToServer(bot); // This connects to the server with a LightTank, but does not immediately start the game
+        // GameWorld.startGame(bot); // This starts the game with a LightTank, and immediately starts the game when connected
+        GameWorld.connectToServer(bot); // This connects to the server with a LightTank, but does not immediately start the game
     }
 
     @Override
