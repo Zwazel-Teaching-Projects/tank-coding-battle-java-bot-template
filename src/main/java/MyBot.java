@@ -43,7 +43,7 @@ public class MyBot implements BotInterface {
 
     public static void main(String[] args) {
         MyBot bot = new MyBot();
-        
+
         GameWorld.startGame(bot); // This starts the game with a LightTank, and immediately starts the game when connected
         // GameWorld.connectToServer(bot); // This connects to the server with a LightTank, but does not immediately start the game
     }
@@ -153,7 +153,10 @@ public class MyBot implements BotInterface {
                         // Move towards enemy if too far
                         tank.moveTowards(world, Tank.MoveDirection.FORWARD, enemy.transformBody().getTranslation(), true);
                     }
-                    tank.rotateTurretTowards(world, enemy.transformBody().getTranslation());
+                    ConnectedClientConfig enemyConfig = enemy.getConnectedClientConfig(world);
+                    TankConfig enemyTankConfig = world.getTankConfig(enemyConfig.clientTankType()).orElseThrow();
+                    Vec3 heightOffset = new Vec3(0, enemyTankConfig.size().getY() / 2.0, 0); // Offset to aim at the center of the enemy tank
+                    tank.rotateTurretTowards(world, enemy.transformBody().getTranslation().add(heightOffset));
 
                     if (distanceToEnemy <= this.maxAttackDistance) {
                         // You can check if you can shoot before shooting
