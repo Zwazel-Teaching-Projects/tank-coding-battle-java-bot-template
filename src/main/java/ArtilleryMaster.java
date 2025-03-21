@@ -23,7 +23,7 @@ public class ArtilleryMaster implements BotInterface {
     // A negative value indicates that it hasn't been initialized yet.
     private Double currentTargetPitch = null;
     private int shotsFiredAtCurrentAngle = 0;
-    private int ticksToWait = 20;
+    private int ticksToWait = 20; // how many ticks to wait before starting to shoot (give the camera some time to get closer)
 
     public static void main(String[] args) {
         ArtilleryMaster bot = new ArtilleryMaster();
@@ -113,7 +113,6 @@ public class ArtilleryMaster implements BotInterface {
 
         Quaternion turretRotation = world.getMyState().transformTurret().getRotation();
         double currentPitch = turretRotation.getPitch();
-        double maxPitch = myTankConfig.turretMaxPitch();
 
         System.out.println("Figuring out where to rotate turret to to shoot...");
         double epsilon = 1e-6; // Acceptable error margin
