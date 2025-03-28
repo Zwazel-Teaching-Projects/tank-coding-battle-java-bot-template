@@ -124,7 +124,7 @@ public class MyBot implements BotInterface {
             // System.out.println("My closest position on the grid: " + myGridPosition);
         }
 
-        LightTank tank = (LightTank) world.getTank();
+        Tank tank = world.getTank();
         TankConfig myTankConfig = tank.getConfig(world);
         GameConfig config = world.getGameConfig();
 
